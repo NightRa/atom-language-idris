@@ -6,7 +6,8 @@ StatusIndicator = require './views/status-indicator-view'
 Logger = require './Logger'
 IdrisModel = require './idris-model'
 Ipkg = require './utils/ipkg'
-REPLView = require './REPLView'
+PanelView = require './views/panel-view'
+REPLView = require './views/repl-view'
 
 class IdrisController
 
@@ -332,19 +333,32 @@ class IdrisController
       .subscribe successHandler, @displayErrors
 
   openREPL: ({target}) =>
-    if ! @replView?
-      callback = (code) =>
-        @model.interpret code, (err, answer, highlightingInfo) =>
-          highlighted = highlighter.highlight answer, highlightingInfo
-          @replView.addInputLine code
-          @replView.addCodeLine highlighted
+    debugger
+    workspace = atom.workspace
 
-      @replView = new REPLView callback: callback
+    #workspaceElement = atom.views.getView(atom.workspace)
+    hostElement = window.document.createElement('div')
+    #workspaceElement.parentNode.appendChild(hostElement)
+    workspace.addBottomPanel
+      item: hostElement
 
-    @messages.show()
-    @messages.clear()
-    @messages.setTitle "REPL"
-    @messages.add @replView
+    replView = REPLView.View (code) =>
+      debugger
+
+    PanelView.openPanel hostElement, replView
+    #if ! @replView?
+    #  callback = (code) =>
+    #    @model.interpret code, (err, answer, highlightingInfo) =>
+    #      highlighted = highlighter.highlight answer, highlightingInfo
+    #      @replView.addInputLine code
+    #      @replView.addCodeLine highlighted
+
+    #  @replView = new REPLView callback: callback
+
+    #@messages.show()
+    #@messages.clear()
+    #@messages.setTitle "REPL"
+    #@messages.add @replView
 
   displayErrors: (err) =>
     @messages.show()
